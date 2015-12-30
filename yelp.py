@@ -1,3 +1,5 @@
+
+
 # Written by Mariah Krimchansky, Nicole Gonzalez, Shreyas Lakhtakia
 # Last updated: 12/11/15, 11pm
 # ELE/COS 381
@@ -9,6 +11,36 @@ import matplotlib.pyplot as plt
 
 # READ IN DATA -----------------------------------------------------------------
 
+# some data doesnt list its price range, and so it was looked up by hand
+
+PriceRange0 = ["McDonald's", "Subway", "Popeyes", "Pizza Hut", "Pizza Shack", "Arby's", \
+               "KFC", "Au Bon Pain Co Inc", "Caribou Coffee", "GM Dog N' Burger Shoope", \
+               "Latina Pizza", "Bellisario Pizza Shop", "Hunan Wok Chinese Restaurant", \
+               "Salonika Imports", "Bobby's Lounge", "Wang's Kitchen", "Amazon Cafe", \
+               "Rowdy BBQ", "Jim's Famous Sauce", "Pizzeria Primos", "Sam's Sun Sandwich",\
+               "Skyvue", "Mama Pepino's", "Vocelli Pizza of Dormont", "Vocelli Pizza", \
+               "The Potato Patch", "Riviera Pizza & Pasta", "Z-Best Barbeque", \
+               "California Taco Shop", "Billu's Indian Grill", "Gavino's Pizzeria", \
+               "The Warhol: Cafe", "Red Hot Pittsburgh","Soup Nancys","The Golden Palace Buffet", \
+               "Angelina's Pizzeria", "Sandpresso", "Edgar's Authentic Mexican","Suzy's Sandwiches & Deli", \
+               "Craftwork Kitchen", "Jean's Southern Cuisine", "51 Wings and Things", "Juice Up 412", \
+               "Binali Pizza", "AVA Cafe + Lounge", "Everest Ethnic Restaurant", "Diyor Cafe and Lounge", \
+               "Philly PittStop", "Pizza Care"]
+
+PriceRange1 = ["Lotus Garden", "The Green Mango", "Vocelli Pizza", "Hot Metal Diner", \
+               "Steel City Diner", "Geno's Restaurant", "Liberty Avenue Deli", \
+                "Lone Star Steakhouse", "Bai Ling Chinese Restaurant", "Boonda's", \
+                "Suds & Subs", "George Aiken", "Finn McCools", "The Jaggerbush", \
+                "Cuzamil", "Maldini's Taste of Italy", "Mulligan's Sports Bar and Grill",\
+                "Island Cafe", "Baba D's","The Salad Cafe", "Molly Brannigans", "The Green Mango Thai Cafe",\
+                "E. M. Pizzeria", "Sal's New York Pizzeria", "Angelias Italian Grille", "La Hacienda",\
+                "Pittza Rella", "Damon's Grill & Sports Bar", "Senor Frogs", "Mullen's", \
+                "Cent Anni's", "Melange Bistro Bar", "Pittsburgh Pizza Grill", "Roxanne's Take-Out  & Catering", \
+                "Chen's Wok","Pizza Milano", "Bellamonte Pizza", "The Smokehouse Bar & Grill", "1905 Eatery", \
+                "Disilva's Pizzeria", "Johnny Rockets"]
+
+PriceRange2 = ["Michael's Restaurant & Lounge", "The Rivers Casino", "Pittsburgh Restaurant Week", \
+               "Club Colony", "Carnegie Delicatessen and Catering"]
 data = []
 with open('yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_business.json') as f:
     for line in f:
@@ -30,7 +62,11 @@ zipTotalRest = {}
 zipAveRest = {}
 # create a hashtable to store the total number of reviews in each zip code
 zipTotalRevs = {}
-    
+# create a hashtable to store how many of each restaurant (price wise) in each zip code
+zipTotPriRest = {}
+# create a hashtable to store total score (price wise) (will late make average)
+zipAvePriRest = {}
+totKeyEr = 0
 for restaurant in data:
     address = restaurant["full_address"]
     #get the zip code from the address
@@ -48,16 +84,44 @@ for restaurant in data:
                 zipTotalRest[str(zipCode)] += 1
                 zipAveRest[str(zipCode)] += restaurant["stars"]
                 zipTotalRevs[str(zipCode)] += restaurant["review_count"]
+                
+                #add the restaurant price by pulling out the dollar signs
+                try:
+                    price = int(restaurant["attributes"]["Price Range"]) - 1
+                except KeyError:
+                    if restaurant['name'] in PriceRange0:
+                        price = 0
+                    elif restaurant['name'] in PriceRange1:
+                        price = 1
+                    elif restaurant['name'] in PriceRange2:
+                        price = 2
+                zipTotPriRest[str(zipCode)][price] += 1
+                zipAvePriRest[str(zipCode)][price] += restaurant["stars"]
             else:
                 zipTotalRest[str(zipCode)] = 1
                 zipAveRest[str(zipCode)] = restaurant["stars"]
                 zipTotalRevs[str(zipCode)] = restaurant["review_count"]
-        
+                
+                #add the restaurant price by pulling out the dollar signs
+                try:
+                    price = int(restaurant["attributes"]["Price Range"]) - 1
+                except KeyError:
+                    print restaurant['name']
+                    if restaurant['name'] in PriceRange0:
+                        price = 0
+                    elif restaurant['name'] in PriceRange1:
+                        price = 1
+                    elif restaurant['name'] in PriceRange2:
+                        price = 2
+                zipTotPriRest[str(zipCode)] = [0,0,0]
+                zipTotPriRest[str(zipCode)][price] += 1
+                zipAvePriRest[str(zipCode)] = [0.,0.,0.]
+                zipAvePriRest[str(zipCode)][price] += restaurant["stars"]
         except ValueError: #throw out data without a zipcode
             pass        
     except IndexError:
         pass
-
+print "KeyError = " + str(totKeyEr)
 # READ IN AVERAGE/MEDIAN INCOME FOR ZIPCODES -----------------------------------
 
 zipMedInc = {}
@@ -150,6 +214,9 @@ N = 0
 for key in zipAveRest:
     #calculate mean restaurant score by zip code
     #do we also want to do a weighted average???
+    for i in range(0,3):
+        if zipTotPriRest[key][i] != 0:
+            zipAvePriRest[key][i] = zipAvePriRest[key][i]/zipTotPriRest[key][i]
     zipAveRest[key] = zipAveRest[key]/zipTotalRest[key]
     R += zipAveRest[key]*zipTotalRevs[key]
     N += zipTotalRevs[key]
@@ -171,9 +238,11 @@ print
 print "Restaurant density by zipcode:"
 print zipTotalRest
 print
-print len(zipMedInc)
-print len(zipAveRest)
-
+print "Restaraunt Price Range density by zipcode"
+print zipTotPriRest
+print
+print "Average Price range for restaurant score by zipcode"
+print zipAvePriRest
 # POPULATION DENSITY BY ZIP CODE -----------------------------------------------
 
 
@@ -192,18 +261,37 @@ zipAveRestList = []
 zipBayRestList = []
 zipTotalRestList = []
 
-for key in zipAveInc:
-	# for each zip code in this hashtable (zipAveInc), store values corresponding to this zip code in lists
-	# ONLY if data for that ZIP code is also available in the hash tables storing Yelp data
+#restaurant variables split by how expensive the restaurant is
+#average restaurant ratings, divided by their expensiveness
+zipLoAveRest = []
+zipMedAveRest = []
+zipHiAveRest = []
 
-	if str(key) in zipAveRest: #this hash table has zip codes stored as strings!
-		zipMedIncList.append(zipMedInc[key])
-		zipDifIncList.append(zipDifInc[key])
-		zipAveIncList.append(zipAveInc[key])
-		zipPopDenList.append(zipPopDen[key])
-		zipAveRestList.append(zipAveRest[str(key)])
-		zipBayRestList.append(zipBayRest[str(key)])
-		zipTotalRestList.append(zipTotalRest[str(key)])
+#restaurant density, divided by their expensiveness
+zipLoDenRest = []
+zipMedDenRest = []
+zipHiDenRest = []
+
+for key in zipAveInc:
+    # for each zip code in this hashtable (zipAveInc), store values corresponding to this zip code in lists
+    # ONLY if data for that ZIP code is also available in the hash tables storing Yelp data
+
+    if str(key) in zipAveRest: #this hash table has zip codes stored as strings!
+        zipMedIncList.append(zipMedInc[key])
+        zipDifIncList.append(zipDifInc[key])
+        zipAveIncList.append(zipAveInc[key])
+        zipPopDenList.append(zipPopDen[key])
+        zipAveRestList.append(zipAveRest[str(key)])
+        zipBayRestList.append(zipBayRest[str(key)])
+        zipTotalRestList.append(zipTotalRest[str(key)])
+        
+        zipLoAveRest.append(zipAvePriRest[str(key)][0])
+        zipMedAveRest.append(zipAvePriRest[str(key)][1])
+        zipHiAveRest.append(zipAvePriRest[str(key)][2])
+        
+        zipLoDenRest.append(zipTotPriRest[str(key)][0])
+        zipMedDenRest.append(zipTotPriRest[str(key)][1])
+        zipHiDenRest.append(zipTotPriRest[str(key)][2])
 
 # plotting average restaurant rating against average income
 fig1 = plt.figure(1)
@@ -215,8 +303,8 @@ plt.show()
 # plot average restaurant Bayesian rating vs average rating
 fig2 = plt.figure(2)
 plt.plot(zipAveRestList, zipBayRestList, 'bo')
-plt.ylabel('Average Bayesian Rating, by ZIP')
-plt.xlabel('Average Restaurant Rating, by ZIP')
+plt.xlabel('Average Bayesian Rating, by ZIP')
+plt.ylabel('Average Restaurant Rating, by ZIP')
 plt.show()
 
 # plot Bayesian average restaurant rating against average income
@@ -226,3 +314,27 @@ plt.xlabel('Average Income, by ZIP')
 plt.ylabel('Average Bayesian Rating, by ZIP')
 plt.show()
 
+# plot total restaurants against average income
+fig4 = plt.figure(4)
+plt.plot(zipAveIncList, zipTotalRestList, 'go')
+plt.xlabel('Average Income, by ZIP')
+plt.ylabel('Number of Restaurants, by ZIP')
+plt.show()
+
+# plot average score, price wise
+fig5 = plt.figure(5)
+plt.plot(zipAveIncList, zipLoAveRest, 'go', color='blue')
+plt.plot(zipAveIncList, zipMedAveRest, 'go', color='green')
+plt.plot(zipAveIncList, zipHiAveRest, 'go', color='red')
+plt.xlabel('Average Income, by ZIP')
+plt.ylabel('Average Score, by ZIP')
+plt.show()
+
+# plot average score, price wise
+fig6 = plt.figure(6)
+plt.plot(zipAveIncList, zipLoDenRest, 'go', color='blue')
+plt.plot(zipAveIncList, zipMedDenRest, 'go', color='green')
+plt.plot(zipAveIncList, zipHiDenRest, 'go', color='red')
+plt.xlabel('Average Income, by ZIP')
+plt.ylabel('Number of Restaurants, by ZIP')
+plt.show()
