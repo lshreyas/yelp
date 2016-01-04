@@ -46,7 +46,7 @@ with open('yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_busines
     for line in f:
         tmpdata = (json.loads(line))
         #make sure business is a restaurant
-        if "Restaurants" in tmpdata["categories"]:
+        if "Restaurants" in tmpdata["categories"] or "Food" in tmpdata["categories"]:
             #make sure business is in pittsburgh
             #right now changed to pennsylvania for more data..
             if " PA " in tmpdata["full_address"]:
