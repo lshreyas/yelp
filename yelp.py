@@ -48,7 +48,7 @@ with open('yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_busines
         if ("Food" in tmpdata["categories"] or "Restaurants" in tmpdata["categories"]):
             #make sure business is in pittsburgh
             #right now changed to pennsylvania for more data..
-            if " PA " in tmpdata["full_address"]:
+            if " NC " in tmpdata["full_address"]:
                 #if both conditions were met, can add to data
                 data.append(tmpdata)
     print("done reading in data...")
@@ -128,7 +128,7 @@ zipAveInc = {}
 zipDifInc = {}
 zipPopDen = {}
 
-f = open('zip_income')
+f = open('zip_income_NC')
 #read 7 lines plus one space per zipcode
 while True:
     brackets = [0] * 6
@@ -308,7 +308,8 @@ slope, interc, r_value, p_value, std_err = stats.linregress(zipAveIncList,zipAve
 plt.plot(zipAveIncList, zipAveRestList, 'ro')
 lineval= [slope * min(zipAveIncList) + interc, slope * max(zipAveIncList) + interc]
 plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval)
-plt.text(60000,4.8,"r_value = " + str(round(r_value,3)))
+plt.text(70000,3.8,"r_value = " + str(round(r_value,3)))
+plt.title('NC Average Income vs. Average Restaurant Rating')
 plt.xlabel('Average Income, by ZIP')
 plt.ylabel('Average Restaurant Rating, by ZIP')
 plt.show()
@@ -317,10 +318,10 @@ plt.show()
 fig2 = plt.figure(2)
 
 slope, interc, r_value, p_value, std_err = stats.linregress(zipAveRestList,zipBayRestList)
-plt.plot(zipAveRestList, zipBayRestList, 'bo')
+plt.plot(zipAveRestList, zipBayRestList, 'ro')
 lineval= [slope * min(zipAveRestList) + interc, slope * max(zipAveRestList) + interc]
 plt.plot([min(zipAveRestList), max(zipAveRestList)], lineval)
-plt.text(4.4,3.620,"r_value = " + str(round(r_value,3)))
+plt.text(3.3,3.560,"r_value = " + str(round(r_value,3)))
 plt.xlabel('Average Bayesian Rating, by ZIP')
 plt.ylabel('Average Restaurant Rating, by ZIP')
 plt.show()
@@ -332,9 +333,10 @@ slope, interc, r_value, p_value, std_err = stats.linregress(zipAveIncList,zipBay
 plt.plot(zipAveIncList, zipBayRestList, 'go')
 lineval= [slope * min(zipAveIncList) + interc, slope * max(zipAveIncList) + interc]
 plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval)
-plt.text(60000,3.620,"r_value = " + str(round(r_value,3)))
+plt.text(80000,3.560,"r_value = " + str(round(r_value,3)))
 plt.xlabel('Average Income, by ZIP')
 plt.ylabel('Average Bayesian Rating, by ZIP')
+
 plt.show()
 
 # plot total restaurants against average income
@@ -344,9 +346,10 @@ slope, interc, r_value, p_value, std_err = stats.linregress(zipAveIncList,zipTot
 plt.plot(zipAveIncList, zipTotalRestList, 'go')
 lineval= [slope * min(zipAveIncList) + interc, slope * max(zipAveIncList) + interc]
 plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval)
-plt.text(60000,250,"r_value = " + str(round(r_value,3)))
+plt.text(70000,200,"r_value = " + str(round(r_value,3)))
 plt.xlabel('Average Income, by ZIP')
 plt.ylabel('Number of Restaurants, by ZIP')
+plt.title('NC Average Income vs. Number of Restaurants')
 plt.show()
 
 # plot average score, price wise
@@ -365,6 +368,10 @@ plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval2,color='green')
 plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval3,color='red')
 plt.xlabel('Average Income, by ZIP')
 plt.ylabel('Average Score, by ZIP')
+plt.title('NC Average Restaurant Score by their Price Ranges')
+plt.text(60000,2.75,'Low r_value='+str(round(r_value1,3))+"\n"+\
+         'Med r_value='+str(round(r_value2,3))+"\n"+\
+        'High r_value='+str(round(r_value3,3)))
 legend = plt.legend(loc='upper left', shadow=True)
 for label in legend.get_texts():
     label.set_fontsize('small')
@@ -374,7 +381,6 @@ plt.show()
 
 
 fig6 = plt.figure(6)
-
 slope1, interc1, r_value1, p_value1, std_err1 = stats.linregress(zipAveIncList,zipLoDenRest)
 slope2, interc2, r_value2, p_value2, std_err2 = stats.linregress(zipAveIncList,zipMedDenRest)
 slope3, interc3, r_value3, p_value3, std_err3 = stats.linregress(zipAveIncList,zipHiDenRest)
@@ -389,6 +395,10 @@ plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval2,color='green')
 plt.plot([min(zipAveIncList), max(zipAveIncList)], lineval3,color='red')
 plt.xlabel('Average Income, by ZIP')
 plt.ylabel('Number of Restaurants, by ZIP')
+plt.title('NC Number of Restaurants by their Price Ranges')
+plt.text(65000,90,'Low r_value='+str(round(r_value1,3))+"\n"+\
+         'Med r_value='+str(round(r_value2,3))+"\n"+\
+        'High r_value='+str(round(r_value3,3)))
 legend = plt.legend(loc='upper left', shadow=True)
 for label in legend.get_texts():
     label.set_fontsize('small')
